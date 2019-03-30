@@ -82,9 +82,9 @@ public abstract class CompressExtension extends AbstractExtension
     private int tailDrop = TAIL_DROP_NEVER;
     private int rsvUse = RSV_USE_ALWAYS;
 
-    private DeflaterPool deflaterPool;
-    private InflaterPool inflaterPool;
     private int POOL_CAPACITY = -1;
+    private DeflaterPool deflaterPool = newDeflaterPool(POOL_CAPACITY);
+    private InflaterPool inflaterPool = newInflaterPool(POOL_CAPACITY);
     private int compressionLevel = Deflater.DEFAULT_COMPRESSION;
 
     protected CompressExtension()
@@ -362,15 +362,6 @@ public abstract class CompressExtension extends AbstractExtension
     }
 
     @Override
-    protected void doStart() throws Exception
-    {
-        super.doStart();
-
-        deflaterPool = newDeflaterPool(POOL_CAPACITY);
-        inflaterPool = newInflaterPool(POOL_CAPACITY);
-    }
-
-    @Override
     public String toString()
     {
         return getClass().getSimpleName();
@@ -384,14 +375,6 @@ public abstract class CompressExtension extends AbstractExtension
     protected InflaterPool newInflaterPool(int capacity)
     {
         return new InflaterPool(capacity, true);
-    }
-
-    public void setDeflaterInflaterPoolCapacity(int capacity)
-    {
-        if (isStarted())
-            throw new IllegalStateException(getState());
-
-        POOL_CAPACITY = capacity;
     }
 
     private static class FrameEntry
