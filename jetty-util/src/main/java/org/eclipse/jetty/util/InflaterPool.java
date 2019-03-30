@@ -26,7 +26,6 @@ import java.util.zip.Inflater;
 public class InflaterPool
 {
     private final Queue<Inflater> _pool;
-    private final int _compressionLevel;
     private final boolean _nowrap;
     private final AtomicInteger _numInflaters = new AtomicInteger(0);
     private final int _capacity;
