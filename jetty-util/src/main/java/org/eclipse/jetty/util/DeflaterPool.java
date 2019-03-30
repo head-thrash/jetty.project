@@ -16,12 +16,13 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.server;
+package org.eclipse.jetty.util;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 public class DeflaterPool
 {

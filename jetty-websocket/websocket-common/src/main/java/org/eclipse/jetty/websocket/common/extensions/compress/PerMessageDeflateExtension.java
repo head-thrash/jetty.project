@@ -24,9 +24,7 @@ import java.util.zip.DataFormatException;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.websocket.api.BadPayloadException;
-import org.eclipse.jetty.websocket.api.BatchMode;
 import org.eclipse.jetty.websocket.api.ProtocolException;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.common.OpCode;
@@ -42,8 +40,6 @@ public class PerMessageDeflateExtension extends CompressExtension
 
     private ExtensionConfig configRequested;
     private ExtensionConfig configNegotiated;
-    private boolean incomingContextTakeover = true;
-    private boolean outgoingContextTakeover = true;
     private boolean incomingCompressed;
 
     @Override
@@ -101,29 +97,6 @@ public class PerMessageDeflateExtension extends CompressExtension
     }
 
     @Override
-    protected void nextIncomingFrame(Frame frame)
-    {
-        if (frame.isFin() && !incomingContextTakeover)
-        {
-            LOG.debug("Incoming Context Reset");
-            decompressCount.set(0);
-            getInflater().reset();
-        }
-        super.nextIncomingFrame(frame);
-    }
-
-    @Override
-    protected void nextOutgoingFrame(Frame frame, WriteCallback callback, BatchMode batchMode)
-    {
-        if (frame.isFin() && !outgoingContextTakeover)
-        {
-            LOG.debug("Outgoing Context Reset");
-            getDeflater().reset();
-        }
-        super.nextOutgoingFrame(frame, callback, batchMode);
-    }
-    
-    @Override
     int getRsvUseMode()
     {
         return RSV_USE_ONLY_FIRST;
@@ -155,30 +128,14 @@ public class PerMessageDeflateExtension extends CompressExtension
                 }
                 case "client_no_context_takeover":
                 {
-                    configNegotiated.setParameter("client_no_context_takeover");
-                    switch (getPolicy().getBehavior())
-                    {
-                        case CLIENT:
-                            incomingContextTakeover = false;
-                            break;
-                        case SERVER:
-                            outgoingContextTakeover = false;
-                            break;
-                    }
+                    // Not supported by Jetty
+                    // Don't negotiate these parameters
                     break;
                 }
                 case "server_no_context_takeover":
                 {
-                    configNegotiated.setParameter("server_no_context_takeover");
-                    switch (getPolicy().getBehavior())
-                    {
-                        case CLIENT:
-                            outgoingContextTakeover = false;
-                            break;
-                        case SERVER:
-                            incomingContextTakeover = false;
-                            break;
-                    }
+                    // Not supported by Jetty
+                    // Don't negotiate these parameters
                     break;
                 }
                 default:
@@ -188,8 +145,6 @@ public class PerMessageDeflateExtension extends CompressExtension
             }
         }
         
-        LOG.debug("config: outgoingContextTakeover={}, incomingContextTakeover={} : {}", outgoingContextTakeover, incomingContextTakeover, this);
-
         super.setConfig(configNegotiated);
     }
 
